@@ -1,3 +1,6 @@
+#ifndef VEC3H
+#define VEC3H
+
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -39,7 +42,7 @@ inline std::istream& operator>>(std::istream &is, vec3 &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const vec3 &t) {
-  os << t.e[0] << " " << t.e[1] << " " << t.e[2];
+  os << int(t.e[0]) << " " << int(t.e[1]) << " " << int(t.e[2]);
   return os;
 }
 
@@ -133,3 +136,5 @@ inline vec3& vec3::operator/=(const float t) {
 inline vec3 unit_vector(vec3 v) {
     return v / v.length();
 }
+
+#endif
