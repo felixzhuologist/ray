@@ -9,7 +9,8 @@ int main() {
     for (int i = 0; i < nx; i++) {
       vec3 pixel(float(i) / float(nx), float(j) / float(ny), 0.2);
       // map [0, 1) to [0, 256)
-      std::cout << 255.99 * pixel << "\n";
+      pixel *= 255.99;
+      std::cout << int(pixel.r()) << " " << int(pixel.g()) << " " << int(pixel.b()) << "\n";
     }
   }
 }
