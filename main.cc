@@ -1,4 +1,6 @@
+#include <random>
 #include <iostream>
+
 #include "camera.h"
 #include "float.h"
 #include "hitable_list.h"
@@ -29,6 +31,7 @@ vec3 color(const ray &r, hitable *world) {
 int main() {
   int nx = 200;
   int ny = 100;
+  int ns = 100;
   std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
   camera cam;
@@ -36,12 +39,22 @@ int main() {
   objects[0] = new sphere(vec3(0, 0, -1), 0.5);
   objects[1] = new sphere(vec3(0, -100.5, -1), 100);
   hitable *world = new hitable_list(objects, 2);
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+
   for (int j = ny - 1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
-      float u = float(i) / float(nx);
-      float v = float(j) / float(ny);
-      ray r = cam.get_ray(u, v);
-      vec3 pixel = 255.99 * color(r, world); // map [0, 1) to [0, 256)
+      vec3 pixel(0, 0, 0);
+      for (int s = 0; s < ns; s++) {
+        float u = float(i + dis(gen)) / float(nx);
+        float v = float(j + dis(gen)) / float(ny);
+        ray r = cam.get_ray(u, v);
+        pixel += color(r, world);
+      }
+      // average color over each sample and map [0, 1) to [0, 256)
+      pixel = (pixel * 255.99) / float(ns);
       std::cout << pixel << "\n";
     }
   }
