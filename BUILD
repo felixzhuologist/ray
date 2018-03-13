@@ -11,10 +11,35 @@ cc_library(
   ]
 )
 
+cc_library(
+  name = "hitable",
+  hdrs = ["hitable.h"],
+  deps = [
+    ":ray",
+  ]
+)
+
+cc_library(
+  name = "sphere",
+  hdrs = ["sphere.h"],
+  deps = [
+    ":hitable"
+  ]
+)
+
+cc_library(
+  name = "hitable_list",
+  hdrs = ["hitable_list.h"],
+  deps = [
+    ":hitable"
+  ]
+)
+
 cc_binary(
   name = "main",
   srcs = ["main.cc"],
   deps = [
-    ":ray",
+    ":hitable_list",
+    ":sphere",
   ]
 )
