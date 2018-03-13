@@ -12,6 +12,14 @@ cc_library(
 )
 
 cc_library(
+  name = "camera",
+  hdrs = ["camera.h"],
+  deps = [
+    ":ray",
+  ]
+)
+
+cc_library(
   name = "hitable",
   hdrs = ["hitable.h"],
   deps = [
@@ -39,6 +47,7 @@ cc_binary(
   name = "main",
   srcs = ["main.cc"],
   deps = [
+    ":camera",
     ":hitable_list",
     ":sphere",
   ]
