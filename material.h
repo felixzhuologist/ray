@@ -17,6 +17,13 @@ vec3 random_in_unit_sphere() {
   return p;
 }
 
+// polynomial approximation of how reflectivity varies with angle
+float schlick(float cosine, float refract_idx) {
+    float r0 = (1-refract_idx) / (1+refract_idx);
+    r0 = r0 * r0;
+    return r0 + (1-r0)*pow((1 - cosine), 5);
+}
+
 // we know that the direction of the reflected ray is v + 2b. We know also know the
 // direction of b already (it is parallel to n) and we can get its length from v \dot n
 //      n     
@@ -82,24 +89,32 @@ class dielectric : public material {
 public:
   dielectric(float ri) : refract_idx(ri) {}
   virtual bool scatter(const ray r, const hit_record rec, vec3 &attenuation, ray &scattered) const {
-    vec3 outward_normal;
-    vec3 reflected = reflect(r.direction(), rec.normal);
-    float n_ratio;
     attenuation = vec3(1.0, 1.0, 1.0);
-    vec3 refracted;
+
+    float n_ratio, cosine;
+    vec3 outward_normal;
     if (dot(r.direction(), rec.normal) > 0) {
       outward_normal = -rec.normal;
       n_ratio = refract_idx;
+      cosine = dot(r.direction(), rec.normal) / r.direction().length();
+      cosine = sqrt(1 - refract_idx*refract_idx*(1-cosine*cosine));
     } else {
       outward_normal = rec.normal;
       n_ratio = 1.0 /refract_idx;
+      cosine = -dot(r.direction(), rec.normal) / r.direction().length();
     }
 
+    float reflect_prob;
+    vec3 refracted;
     if (refract(r.direction(), outward_normal, n_ratio, refracted)) {
-      scattered = ray(rec.p, refracted);
+      reflect_prob = schlick(cosine, refract_idx);
     } else {
-      scattered = ray(rec.p, reflected);
+      reflect_prob = 1.0;
     }
+
+    scattered = dis(gen) < reflect_prob 
+      ? ray(rec.p, reflect(r.direction(), rec.normal))
+      : ray(rec.p, refracted);
     return true;
   }
 
