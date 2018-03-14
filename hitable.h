@@ -3,11 +3,14 @@
 
 #include "ray.h"
 
+class material;
+
 // information about where a ray hits an object/"hitable"
 struct hit_record {
   float t;
   vec3 p;
   vec3 normal;
+  material *mat_ptr;
 };
 
 // abstract class of an object that can be hit by a ray

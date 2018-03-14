@@ -4,21 +4,8 @@
 #include "camera.h"
 #include "float.h"
 #include "hitable_list.h"
+#include "material.h"
 #include "sphere.h"
-
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution<> dis(0.0, 1.0);
-
-// return a random point in unit sphere
-vec3 random_in_unit_sphere() {
-  vec3 p;
-  do {
-    // random point in unit cube (each point is in -1, 1)
-    p = 2*vec3(dis(gen), dis(gen), dis(gen)) - vec3(1.0, 1.0, 1.0);
-  } while (p.squared_length() >= 1.0);
-  return p;
-}
 
 // Return the background color for a ray, which is a linear interpolation
 // of the its y direction (white at 0 and blue at 1)
@@ -34,10 +21,11 @@ vec3 color(const ray &r, hitable *world) {
   // min t is 0 since we don't care about things behind us, and ignore hits
   // very close to 0 to avoid shadow acne
   if (world->hit(r, 0.001, MAXFLOAT, rec)) {
-    // generate a random target for the diffused ray - the color for the current
-    // ray will be that of the target, but with 50% of the energy absorbed
-    vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-    return 0.5 * color(ray(rec.p, target - rec.p), world);
+    ray scattered;
+    vec3 attenuation;
+    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+      return attenuation * color(scattered, world);
+    }
   }
   return background_color(r);
 }
@@ -50,8 +38,8 @@ int main() {
 
   camera cam;
   hitable *objects[2];
-  objects[0] = new sphere(vec3(0, 0, -1), 0.5);
-  objects[1] = new sphere(vec3(0, -100.5, -1), 100);
+  objects[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.5, 0.5, 0.5)));
+  objects[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.5, 0.5, 0.5)));
   hitable *world = new hitable_list(objects, 2);
 
   for (int j = ny - 1; j >= 0; j--) {
