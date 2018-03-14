@@ -17,6 +17,19 @@ vec3 random_in_unit_sphere() {
   return p;
 }
 
+// we know that the direction of the reflected ray is v + 2b. We know also know the
+// direction of b already (it is parallel to n) and we can get its length from v \dot n
+//      n     
+//  v \ | / ret val
+//     \|/ |
+// ____________
+//     v \ |
+//        \| b    
+vec3 reflect(const vec3 &v, const vec3 &n) {
+  vec3 b = dot(v, n) * n;
+  return v - 2*b;
+}
+
 class material {
 public:
   virtual bool scatter(const ray r, const hit_record rec, vec3 &attenuation, ray &scattered) const = 0;
@@ -33,6 +46,18 @@ public:
     scattered = ray(rec.p, target - rec.p);
     attenuation = albedo;
     return true;
+  }
+
+  vec3 albedo;
+};
+
+class metal : public material {
+public:
+  metal(const vec3 a): albedo(a) {}
+  virtual bool scatter(const ray r, const hit_record rec, vec3 &attenuation, ray &scattered) const {
+    scattered = ray(rec.p, reflect(unit_vector(r.direction()), rec.normal));
+    attenuation = albedo;
+    return (dot(scattered.direction(), rec.normal) > 0);
   }
 
   vec3 albedo;

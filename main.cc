@@ -16,15 +16,18 @@ vec3 background_color(const ray &r) {
   return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
 }
 
-vec3 color(const ray &r, hitable *world) {
+ 
+vec3 color(const ray &r, hitable *world, int depth) {
   hit_record rec;
   // min t is 0 since we don't care about things behind us, and ignore hits
   // very close to 0 to avoid shadow acne
   if (world->hit(r, 0.001, MAXFLOAT, rec)) {
     ray scattered;
     vec3 attenuation;
-    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-      return attenuation * color(scattered, world);
+    if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+      return attenuation * color(scattered, world, depth + 1);
+    } else {
+      return vec3(0.0, 0.0, 0.0);
     }
   }
   return background_color(r);
@@ -37,10 +40,12 @@ int main() {
   std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
   camera cam;
-  hitable *objects[2];
-  objects[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.5, 0.5, 0.5)));
-  objects[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.5, 0.5, 0.5)));
-  hitable *world = new hitable_list(objects, 2);
+  hitable *objects[4];
+  objects[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
+  objects[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+  objects[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2)));
+  objects[3] = new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8)));
+  hitable *world = new hitable_list(objects, 4);
 
   for (int j = ny - 1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
@@ -49,7 +54,7 @@ int main() {
         float u = float(i + dis(gen)) / float(nx);
         float v = float(j + dis(gen)) / float(ny);
         ray r = cam.get_ray(u, v);
-        pixel += color(r, world);
+        pixel += color(r, world, 0);
       }
 
       // average color over each sample, apply gamma correction of gamma=2 to 
