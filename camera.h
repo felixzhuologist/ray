@@ -7,7 +7,7 @@ class camera {
 public:
   camera(float vfov, float aspect) {
     float theta = vfov*M_PI/180;
-    float half_height = tan(theta/2);
+    float half_height = tan(theta/2); // assuming z=-1 plane below
     float half_width = aspect * half_height;
 
     origin = vec3(0.0, 0.0, 0.0);
