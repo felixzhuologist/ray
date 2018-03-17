@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <iostream>
 
+// this should probably go in its own file but i'm sticking it here since vec3
+// is most upstream
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(0.0, 1.0);
+
 class vec3 {
 public:
   vec3() {}

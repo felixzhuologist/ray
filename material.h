@@ -3,10 +3,6 @@
 
 #include "hitable.h"
 
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution<> dis(0.0, 1.0);
-
 // return a random point in unit sphere
 vec3 random_in_unit_sphere() {
   vec3 p;
