@@ -12,6 +12,14 @@ cc_library(
 )
 
 cc_library(
+  name = "texture",
+  hdrs = ["texture.h"],
+  deps = [
+    ":vec3",
+  ]
+)
+
+cc_library(
   name = "camera",
   hdrs = ["camera.h"],
   deps = [
@@ -48,6 +56,7 @@ cc_library(
   hdrs = ["material.h"],
   deps = [
     ":hitable",
+    ":texture",
   ]
 )
 
@@ -76,5 +85,6 @@ cc_binary(
     ":hitable_list",
     ":material",
     ":sphere",
+    ":texture",
   ]
 )
