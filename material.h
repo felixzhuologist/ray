@@ -48,6 +48,9 @@ bool refract(const vec3 &v, const vec3 &n, float n_ratio, vec3 &refracted) {
 class material {
 public:
   virtual bool scatter(const ray r, const hit_record rec, vec3 &attenuation, ray &scattered) const = 0;
+  virtual vec3 emitted(const vec3 &p) const {
+    return vec3(0, 0, 0);
+  }
 };
 
 class lambertian : public material {
@@ -59,7 +62,7 @@ public:
     // ray will be that of the target, but with 50% of the energy absorbed
     vec3 target = rec.p + rec.normal + random_in_unit_sphere();
     scattered = ray(rec.p, target - rec.p);
-    attenuation = albedo->value(0, 0, rec.p);
+    attenuation = albedo->value(rec.p);
     return true;
   }
 
@@ -116,6 +119,19 @@ public:
   }
 
   float refract_idx;
+};
+
+class diffuse_light: public material {
+public:
+  diffuse_light(texture *a) : emit(a) {}
+  virtual bool scatter(const ray r, const hit_record rec, vec3 &attenuation, ray &scattered) const {
+    return false;
+  }
+  virtual vec3 emitted(const vec3 &p) const {
+    return emit->value(p);
+  }
+
+  texture *emit;
 };
 
 #endif

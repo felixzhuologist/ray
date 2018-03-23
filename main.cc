@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "float.h"
 #include "material.h"
+#include "rectangle.h"
 #include "sphere.h"
 #include "texture.h"
 
@@ -25,13 +26,15 @@ vec3 color(const ray &r, hitable *world, int depth) {
   if (world->hit(r, 0.001, MAXFLOAT, rec)) {
     ray scattered;
     vec3 attenuation;
+    vec3 emitted = rec.mat_ptr->emitted(rec.p);
     if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-      return attenuation * color(scattered, world, depth + 1);
+      return emitted + attenuation*color(scattered, world, depth + 1);
     } else {
-      return vec3(0.0, 0.0, 0.0);
+      return emitted;
     }
   }
   return background_color(r);
+  // return vec3(0, 0, 0);
 }
 
 hitable *random_scene() {
@@ -72,6 +75,14 @@ hitable *small_scene() {
   objects[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
   objects[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
   return new bvh_node(objects, 4);
+}
+
+hitable *simple_light() {
+  hitable *objects[4];
+  objects[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(new constant_texture(vec3(0.7, 0.6, 0.5))));
+  objects[1] = new sphere(vec3(0, 2, 0), 2, new lambertian(new constant_texture(vec3(0.8, 0.3, 0.3))));
+  objects[2] = new xy_rect(3, 5, 1, 3, -2, new diffuse_light(new constant_texture(vec3(4, 4, 4))));
+  return new bvh_node(objects, 3);
 }
 
 int main() {

@@ -69,6 +69,14 @@ cc_library(
 )
 
 cc_library(
+  name = "rectangle",
+  hdrs = ["rectangle.h"],
+  deps = [
+    ":hitable"
+  ]
+)
+
+cc_library(
   name = "hitable_list",
   hdrs = ["hitable_list.h"],
   deps = [
@@ -84,6 +92,7 @@ cc_binary(
     ":bvh",
     ":hitable_list",
     ":material",
+    ":rectangle",
     ":sphere",
     ":texture",
   ]
